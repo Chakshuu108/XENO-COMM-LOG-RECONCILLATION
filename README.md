@@ -54,6 +54,7 @@ Sum of `distinct_customers` = **25** — still not 22, and wrong in two opposite
 - **It undercounts standalone sends.** `COUNT(DISTINCT customer_id)` changes `9101` from 7 rows to 6 customers because `C20` appears twice. However, `9101` is a standalone campaign, so those two sends are separate events and both should count.
 
 That's why a simple `GROUP BY` or `COUNT(DISTINCT)` cannot handle both cases. Retry chains need customers deduplicated across campaigns, while standalone campaigns must keep every send. The `roots` and `chain_flag` logic identifies these two cases before applying the correct counting rule.
+
 ## 2. SQL
 
 Works against `data/comm_log.db` as-is.
@@ -176,4 +177,4 @@ SELECT SUM(qualifying_sends) AS target_base FROM (
 ---
 
 **Chakshu Gupta** | B.Tech CSE, Thapar University  
-[LinkedIn](https://www.linkedin.com/in/chakshugupta108/)
+📞 9306433994 | [LinkedIn](https://www.linkedin.com/in/chakshugupta108/)
