@@ -6,12 +6,11 @@ Each row below is a running total — the number after applying that one adjustm
 
 | Step | Description | Result | Reason |
 |---|---|---:|---|
-| 0 | Count all `communication_log` rows for merchant 501, Oct 2026, Diwali campaigns, `communication_type = '2'` | **30** | Starting count before any adjustments |
-| 1 | Remove rows for campaign `9004` (`approval_awaiting`) | **26 (-4)** | `9004` is not finalized, so its 4 sends do not count |
-| 2 | Collapse retry chain `9001 → 9002 → 9003` to distinct customers | **23 (-3)** | The 13 sends belong to 10 customers, so retries are counted once |
-| 3 | Collapse retry chain `9201 → 9202` to distinct customers | **22 (-1)** | The 6 sends belong to 5 customers, so the retry is counted once |
-| Final | Keep standalone campaign `9101` unchanged | **22** | It has no retries, so every send counts, including the two sends to `C20` |
-
+| 0 | Count all `communication_log` rows for merchant 501, Oct 2026, Diwali campaigns, `communication_type = '2'` | **30** | This is the naive starting count before applying the campaign lifecycle and retry rules. |
+| 1 | Remove rows for campaign `9004` (`approval_awaiting`) | **26 (-4)** | A campaign is reportable only after its creation workflow has cleared. `9004` is still `approval_awaiting`, so its 4 send records must be excluded even though `processing_status = 'processed'`. |
+| 2 | Collapse retry chain `9001 → 9002 → 9003` to distinct customers | **23 (-3)** | These are retry attempts of the same underlying communication. The 13 send records reached only 10 distinct customers, so each customer should count once across the full retry chain. |
+| 3 | Collapse retry chain `9201 → 9202` to distinct customers | **22 (-1)** | `9202` is a retry of `9201`. The 6 send records reached 5 distinct customers, so the repeated customer is counted only once across the chain. |
+| Final | Keep standalone campaign `9101` unchanged | **22** | `9101` has no retry relationship, so each send is a separate event. All 7 rows count, including the two separate sends to `C20`. |
 ### Composition of the final 22 (for reference)
 
 | Underlying communication | Campaigns | Raw rows | Distinct customers counted |
