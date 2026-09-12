@@ -49,11 +49,11 @@ GROUP BY cl.communication_id;
 
 Sum of `distinct_customers` = **25** — still not 22, and wrong in two opposite directions at once:
 
-- **It overcounts the chains.** `GROUP BY communication_id` groups by *campaign*, not by *underlying communication*. So `C2` (sent under 9001, retried under 9002) gets counted once under 9001 **and** once under 9002 — the dedup only happens within a single campaign's rows, never across the parent→child relationship. Same for `C3` across 9001/9002/9003, and `D1` across 9201/9202. This is exactly what the README's "Retry chains" section warns about: a chain has to be collapsed as *one* unit, not campaign-by-campaign.
-- **It simultaneously undercounts the standalone campaign.** `9101` drops from 7 raw rows to 6 distinct customers, because `COUNT(DISTINCT customer_id)` blindly collapses `C20`'s two legitimate, independent sends (Oct 10 and Oct 20) into one — even though 9101 isn't a retry chain at all. The README is explicit that this is *not* a retry, so it should **never** be deduped.
+- **It overcounts retry chains.** `GROUP BY communication_id` treats each campaign separately instead of treating the parent→child campaigns as one underlying communication. So customers like `C2`, `C3`, and `D1` can be counted more than once across their retry campaigns.
 
-That's why a plain `GROUP BY` can't work here regardless of which column you group on: campaigns that *are* chains need cross-campaign deduping that a per-campaign `GROUP BY` can't see, while the one campaign that *isn't* a chain needs to explicitly **not** be deduped — and a single flat `COUNT(DISTINCT ...)` can't apply two different rules to two different groups. That's the actual reason the solution needs the `roots`/`chain_flag` logic: it has to first figure out *which* rows belong to the same underlying communication (via `parent_id`, potentially several levels deep) before deciding whether to dedupe that group at all.
+- **It undercounts standalone sends.** `COUNT(DISTINCT customer_id)` changes `9101` from 7 rows to 6 customers because `C20` appears twice. However, `9101` is a standalone campaign, so those two sends are separate events and both should count.
 
+That's why a simple `GROUP BY` or `COUNT(DISTINCT)` cannot handle both cases. Retry chains need customers deduplicated across campaigns, while standalone campaigns must keep every send. The `roots` and `chain_flag` logic identifies these two cases before applying the correct counting rule.
 ## 2. SQL
 
 Works against `data/comm_log.db` as-is.
