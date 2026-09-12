@@ -166,4 +166,8 @@ SELECT SUM(qualifying_sends) AS target_base FROM (
 
 ## 3. What surprised me
 
-A few things stood out while digging through the data. First, campaign `9004` has `processing_status = 'processed'` but its `creation_status` is still `approval_awaiting`, showing that processing can happen before approval is complete. Second, the cart-recovery retry chain goes three levels deep (`9001 → 9002 → 9003`), with customers like `C3` appearing in multiple attempts, so retries must be deduplicated across the full chain. Third, `delivery_status` does not affect `target_base` — failed and delivered attempts still represent the same targeted customer when they belong to the same retry chain.
+- **Campaign `9004`** has `processing_status = 'processed'` but `creation_status = 'approval_awaiting'`, showing that processing can happen before approval is complete.
+
+- **The cart-recovery retry chain** goes three levels deep (`9001 → 9002 → 9003`), with customers like `C3` appearing in multiple attempts, so retries must be deduplicated across the full chain.
+
+- **`delivery_status` does not affect `target_base`** — failed and delivered attempts still represent the same targeted customer when they belong to the same retry chain.
