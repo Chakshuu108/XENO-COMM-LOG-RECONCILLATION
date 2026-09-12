@@ -173,7 +173,7 @@ SELECT SUM(qualifying_sends) AS target_base FROM (
 - **`delivery_status` does not affect `target_base`** — failed and delivered attempts still represent the same targeted customer when they belong to the same retry chain.
 
 
-## 4. Submitted by
+---
 
-**Chakshu Gupta**  
-B.Tech CSE | Thapar University
+**Chakshu Gupta** | B.Tech CSE, Thapar University  
+📞 9306433994 | [LinkedIn](https://www.linkedin.com/in/chakshugupta108/)
