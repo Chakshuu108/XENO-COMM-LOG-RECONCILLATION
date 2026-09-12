@@ -171,3 +171,9 @@ SELECT SUM(qualifying_sends) AS target_base FROM (
 - **The cart-recovery retry chain** goes three levels deep (`9001 → 9002 → 9003`), with customers like `C3` appearing in multiple attempts, so retries must be deduplicated across the full chain.
 
 - **`delivery_status` does not affect `target_base`** — failed and delivered attempts still represent the same targeted customer when they belong to the same retry chain.
+
+
+## 4. Submitted by
+
+**Chakshu Gupta**  
+B.Tech CSE | Thapar University
