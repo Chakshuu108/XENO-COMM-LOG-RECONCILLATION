@@ -176,4 +176,4 @@ SELECT SUM(qualifying_sends) AS target_base FROM (
 ---
 
 **Chakshu Gupta** | B.Tech CSE, Thapar University  
-📞 9306433994 | [LinkedIn](https://www.linkedin.com/in/chakshugupta108/)
+[LinkedIn](https://www.linkedin.com/in/chakshugupta108/)
