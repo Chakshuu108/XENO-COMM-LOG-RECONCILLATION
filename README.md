@@ -5,12 +5,12 @@
 Each row below is a running total — the number after applying that one adjustment to the number above it — so the table reads straight down from the naive count to Finance's 22.
 
 | Step | Description | Result | Reason |
-|---|---|---|---|
-| 0 | Naive count: all `communication_log` rows for merchant 501, Oct 2026, Diwali campaigns, `communication_type = '2'` | **30** | Starting point — every send attempt, no adjustments |
-| 1 | Drop rows belonging to campaign **9004** ("Diwali Cart Recovery – Retry C (pending)") | **26** (−4) | `9004.creation_status = 'approval_awaiting'`. Per the data dictionary, a campaign only counts toward reporting once its creation workflow has cleared — `approval_awaiting` hasn't, even though its `processing_status` is `'processed'` and its 4 comm_log rows already exist. The send pipeline ran ahead of approval sign-off, so these sends aren't reportable yet. |
-| 2 | Collapse the retry chain `9001 → 9002 → 9003` down to distinct customers | **23** (−3) | This is one *underlying communication*, not three campaigns. Raw rows = 13 (10 under 9001, 2 under 9002, 1 under 9003), but only 10 distinct customers: `C2` was sent under 9001 then retried under 9002 (2 rows → 1 customer); `C3` was sent under 9001, retried under 9002, retried again under 9003 (3 rows → 1 customer). |
-| 3 | Collapse the retry chain `9201 → 9202` down to distinct customers | **22** (−1) | Same logic, second chain. Raw rows = 6, distinct customers = 5 — `D1` failed under 9201 and was retried (and delivered) under 9202, so it's 1 customer, not 2 rows. |
-| **Final** | Campaign `9101` ("Diwali Flash Sale – Standalone") needed **no adjustment**: it has no parent and nothing retries off it, so it's a standalone communication — every send is its own event, including `C20` appearing twice (Oct 10 and Oct 20 sends both count). Its 7 rows pass through untouched. | **22** | Matches Finance's `target_base` |
+|---|---|---:|---|
+| 0 | Count all `communication_log` rows for merchant 501, Oct 2026, Diwali campaigns, `communication_type = '2'` | **30** | Starting count before any adjustments |
+| 1 | Remove rows for campaign `9004` (`approval_awaiting`) | **26 (-4)** | `9004` is not finalized, so its 4 sends do not count |
+| 2 | Collapse retry chain `9001 → 9002 → 9003` to distinct customers | **23 (-3)** | The 13 sends belong to 10 customers, so retries are counted once |
+| 3 | Collapse retry chain `9201 → 9202` to distinct customers | **22 (-1)** | The 6 sends belong to 5 customers, so the retry is counted once |
+| Final | Keep standalone campaign `9101` unchanged | **22** | It has no retries, so every send counts, including the two sends to `C20` |
 
 ### Composition of the final 22 (for reference)
 
